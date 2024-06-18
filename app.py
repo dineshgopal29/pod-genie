@@ -69,7 +69,7 @@ llm = ChatOpenAI(
 embedding_function = OpenAIEmbeddings(model="text-embedding-3-large",api_key=OAI_KEY)
 
 # Create FAISS from the documents
-#setup_vector_store(data_ingestion())
+setup_vector_store(data_ingestion())
 
 faiss_index = FAISS.load_local(
     "faiss_index", embeddings=embedding_function, allow_dangerous_deserialization=True
