@@ -22,7 +22,7 @@ from langchain_community.document_loaders.pdf import PyPDFDirectoryLoader
 from langchain.chat_models import ChatOpenAI
 import time
 
-OAI_KEY = ''
+OAI_KEY = os.environ["OAI_KEY"]
 
 # Load the PDFs from the directory
 def data_ingestion():
