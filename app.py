@@ -21,6 +21,7 @@ from langchain_community.document_loaders.pdf import PyPDFDirectoryLoader
 # call llama LLM locally
 from langchain.chat_models import ChatOpenAI
 import time
+import os
 
 OAI_KEY = os.environ["OAI_KEY"]
 
