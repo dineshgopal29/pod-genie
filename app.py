@@ -59,9 +59,6 @@ PROMPT = PromptTemplate(
     template=prompt_template, input_variables=["context", "question"]
 )
 
-# Create FAISS from the documents
-setup_vector_store(data_ingestion())
-
 #initialize the LLM object
 llm = ChatOpenAI(
     model_name="gpt-3.5-turbo",
@@ -70,6 +67,9 @@ llm = ChatOpenAI(
 
 # create the open-source embedding function
 embedding_function = OpenAIEmbeddings(model="text-embedding-3-large",api_key=OAI_KEY)
+
+# Create FAISS from the documents
+setup_vector_store(data_ingestion())
 
 faiss_index = FAISS.load_local(
     "faiss_index", embeddings=embedding_function, allow_dangerous_deserialization=True
