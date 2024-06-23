@@ -20,8 +20,14 @@ from langchain_community.document_loaders.pdf import PyPDFDirectoryLoader
 
 # call llama LLM locally
 from langchain.chat_models import ChatOpenAI
+from langchain import HuggingFaceHub
 import time
 import os
+
+# Opensource Embeddings
+from langchain_community.embeddings.sentence_transformer import (
+    SentenceTransformerEmbeddings,
+)
 
 OAI_KEY = os.environ["OAI_KEY"]
 
@@ -30,7 +36,7 @@ def data_ingestion():
     loader = PyPDFDirectoryLoader("data")
     documents = loader.load()
     # Split the text into chunks
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=250)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1024, chunk_overlap=64)
     docs = text_splitter.split_documents(documents)
     return docs
 
@@ -47,7 +53,7 @@ def setup_vector_store(documents):
 # Create a prompt template
 prompt_template = """Use the following pieces of context to answer the question at the end. Please follow the following rules:
 1. If the answer is not within the context knowledge, kindly state that you do not know, rather than attempting to fabricate a response.
-2. If you find the answer, please craft a detailed and concise response to the question at the end. Aim for a summary of max 500 words, ensuring that your explanation is thorough.
+2. If you find the answer, please craft a detailed and concise response to the question at the end. Aim for a summary of max 250 words, ensuring that your explanation is thorough.
 
 {context}
 
@@ -59,14 +65,17 @@ PROMPT = PromptTemplate(
     template=prompt_template, input_variables=["context", "question"]
 )
 
-#initialize the LLM object
-llm = ChatOpenAI(
-    model_name="gpt-3.5-turbo",
-    openai_api_key=OAI_KEY,
-)
-
 # create the open-source embedding function
-embedding_function = OpenAIEmbeddings(model="text-embedding-3-large",api_key=OAI_KEY)
+embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+#initialize the LLM object
+llm = HuggingFaceHub(repo_id='tiiuae/falcon-7b-instruct', huggingfacehub_api_token=OAI_KEY,task="text-generation",
+            model_kwargs = {
+                "min_length": 200,
+                "max_length":2000,
+                "temperature":0.5,
+                "max_new_tokens":300,
+                "num_return_sequences":1
+            })
 
 # Create FAISS from the documents
 setup_vector_store(data_ingestion())
